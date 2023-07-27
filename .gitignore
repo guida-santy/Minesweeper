@@ -37,4 +37,4 @@ out
 .vs
 .vscode
 .idea
-cmake-build-*%
+cmake-build-*
