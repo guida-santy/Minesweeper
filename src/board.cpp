@@ -5,127 +5,89 @@
 #include <algorithm>
 
 void board::Grid::SetBombs() {
-    std::set<std::pair<int, int>> bombs;
+    int bombs = 0;
     std::random_device rd;
     std::mt19937 generator(rd());
     std::uniform_int_distribution<int> distribution(1, 9);
 
-    while (bombs.size() < _numberOfBombs) {
+    while (bombs < _numberOfBombs) {
         int row = distribution(generator);
         int column = distribution(generator);
 
-        if (bombs.find(std::make_pair(row, column)) == bombs.end()) {
-            bombs.insert(std::make_pair(row, column));
-            Cell newCell(std::make_pair(row, column), board::cellType::bomb);
-            _bombIngrid.push_back(newCell);
+        if(_fullGrid[row][column].GetType() != cellType::bomb){
+            bombs++;
+            _fullGrid[row][column].SetType(cellType::bomb);
         }
+
     }
 
-
-}
-
-void board::Cell::SetState(Cell cell) {
-    cell._state = 0;
 }
 
 void board::Grid::CreateGrid() {
     _runningDebug = true;
     SetBombs();
-    for (u_int r = 1; r <= _columns; r++) {
-        for (u_int c = 1; c <= _rows; c++) {
-            const auto cellIter = std::find_if(_bombIngrid.begin(), _bombIngrid.end(), [&](Cell &cell) {
-                return cell.GetGlobalPos() == std::make_pair(r, c);
-            });
-            if (cellIter == _bombIngrid.end()) {
-                const Cell normCell(std::make_pair(r, c), board::cellType::normal);
-                board::Cell::SetState(normCell);
-                _fullGrid.push_back(normCell);
-            } else {
 
-                _fullGrid.push_back(*cellIter);
+    // Set states
+    // Function to count bombs in the 3x3 window around a cell
+    auto countBombsInWindow = [&](int row, int col) {
+        int bombCount = 0;
+        // Loop over a 3x3 window around the cell (row, col)
+        for (int r = std::max(1, row - 1); r <= std::min(_rows, row + 1); ++r) {
+            for (int c = std::max(1, col - 1); c <= std::min(_columns, col + 1); ++c) {
+                bombCount += (_fullGrid[r][c].GetType() == cellType::bomb) ? 1 : 0; // Convert bool to int (1 for true, 0 for false)
             }
+        }
+        return bombCount;
+    };
 
+
+    // Calculate the state for each cell using std::accumulate
+    for (int r = 1; r <= _rows; ++r) {
+        for (int c = 1; c <= _columns; ++c) {
+            _fullGrid[r][c].SetState(countBombsInWindow(r, c));
         }
     }
 
-
 }
 
-bool board::Grid::checkIfBomb(std::pair<u_int, u_int> coord) {
-    return std::any_of(_bombIngrid.begin(), _bombIngrid.end(), [&](Cell &cell) {
-        return cell.GetGlobalPos() == coord;
-    });
-}
 
-bool board::Grid::EvaluateCoordinates(std::pair<u_int, u_int> coord) {
-    if (checkIfBomb(coord)) {
+bool board::Grid::EvaluateCoordinates(int row, int col) {
+    _fullGrid[row][col].RevelCell();
+    if(_fullGrid[row][col].GetType() == cellType::bomb){
         _runningDebug = false;
         return false;
     }
-
-    //update reveled cells state
-    const auto it = std::find_if(_fullGrid.begin(), _fullGrid.end(), [&](Cell &cell) {
-        return cell.GetGlobalPos() == coord;
-    });
-
-    if (it != _fullGrid.end()) {
-        it->RevelCell();
-        Cell newRevel = *it;
-        _reveledCells.push_back(newRevel);
-    } else {
-        std::cout << "Exception error ! Out of grid" << std::endl;
-        return false;
-    }
-
     return true;
 }
 
 void board::Grid::Debug_PrintBoard() {
 
-    int c = 1;
-    for (auto it = _fullGrid.begin(); it != _fullGrid.end(); ++it) {
-        if (it->GetType() == board::cellType::normal) {
-            std::cout << "[" << it->GetGlobalPos().first << " , " << it->GetGlobalPos().second << "]";
-        } else {
-            std::cout << "[BOMB!]";
+    for (int r = 1; r <= _rows; ++r) {
+        for (int c = 1; c <= _columns; ++c) {
+            if(_fullGrid[r][c].GetType() == board::cellType::normal){
+                std::cout << "[" << _fullGrid[r][c].GetState() <<"]" << " ";
+            }
+            else std::cout << "[B]" << " ";
         }
-        std::cout << " ";
-        if (c == 9) {
-            std::cout << std::endl;
-            c = 1;
-        } else c++;
-
+        std::cout << "\n";
     }
 
 }
 
 void board::Grid::Debug_PrintGridForUser() {
-
-    int c = 0;
-    int currentLine = 1;
     std::cout << "\n\n" << std::endl;
-    std::cout << "    A    B    C    D    E    F    G    H    I" << std::endl;
-    for (auto it = _fullGrid.begin(); it != _fullGrid.end(); ++it) {
-        if (c == 0) {
-            std::cout << currentLine;
-            c++;
-            currentLine++;
+    std::cout << "   A   B   C   D   E   F   G   H   I" << std::endl;
+    for (int r = 1; r <= _rows; ++r) {
+        std::cout << r << " ";
+        for (int c = 1; c <= _columns; ++c) {
+            if(!_runningDebug && _fullGrid[r][c].GetType() ==  board::cellType::bomb){
+                std::cout << "[B]" << " ";
+
+            } else if(_fullGrid[r][c].GetType() == board::cellType::normal && _fullGrid[r][c].WasCellReveled()){
+                std::cout << "[" << _fullGrid[r][c].GetState() <<"]" << " ";
+            }
+            else std::cout << "[X]" << " ";
         }
-
-        if ((it->GetType() == board::cellType::bomb) && !_runningDebug) {
-            std::cout << "  *B*";
-        } else if (it->WasCellReveled()) {
-            std::cout << "  [" << it->GetState() << "]";
-        } else {
-            std::cout << "  [X]";
-        }
-
-
-        if (c == 9) {
-            std::cout << std::endl;
-            c = 0;
-        } else c++;
-
+        std::cout << "\n";
     }
-    std::cout << "\n\n" << std::endl;
 }
