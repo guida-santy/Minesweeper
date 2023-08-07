@@ -15,25 +15,25 @@ namespace board {
 
     class Cell {
     public:
-        Cell(std::pair<u_int, u_int> pos) : _globalPos(std::move(pos)) {}
+        explicit Cell(std::pair<u_int, u_int> pos) : _globalPos(std::move(pos)) {}
 
         cellType GetType() { return _type; }
 
         void SetType(cellType t) { _type = t; }
 
-        int GetState() { return _state; }
+        int GetState() const { return _state; }
 
         void SetState(int s) { _state = s; }
 
         void RevelCell() { _reveled = true; }
 
-        bool WasCellReveled() { return _reveled; }
+        bool WasCellReveled() const { return _reveled; }
 
 
     private:
         const std::pair<u_int, u_int> _globalPos{}; //board pos (r,c)
         cellType _type = cellType::normal ;
-        int _state = 0; // how close to bomb
+        u_int _state = 0; // how close to bomb
         bool _reveled = false;
     };
 
@@ -49,17 +49,26 @@ namespace board {
 
         void Debug_PrintGridForUser();
 
-        bool EvaluateCoordinates(int row, int col);
+        void RevelCell(int row,  int col);
 
-        bool CellAlreadyReveled(int row, int col) { return _fullGrid[row][col].WasCellReveled(); }
+        bool EvaluateCoordinates(int row,  int col);
 
+        bool CellAlreadyReveled(const int row, const int col) { return _fullGrid[row][col].WasCellReveled(); }
+
+        bool GetRows() const {return _rows;}
+
+        bool GetColumns() const {return _columns;}
+
+        bool GetNumberOfBombs() const {return _numberOfBombs;}
+
+        int GetNumberCellsReveled() const {return _numberOfReveledCells;}
 
     private:
-        int _size = 9 * 9;
-        int _rows = 9;
-        int _columns = 9;
+        const int _rows = 9;
+        const int _columns = 9;
         std::vector<std::vector<Cell>> _fullGrid{};
-        int _numberOfBombs = 10;
+        const int _numberOfBombs = 10;
+        int _numberOfReveledCells = 0;
         bool _runningDebug = false;
 
     };

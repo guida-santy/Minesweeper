@@ -8,14 +8,16 @@ int main() {
     world.CreateGrid();
 
     world.Debug_PrintBoard();
-    world.Debug_PrintGridForUser();
 
     std::string userInput{};
     bool running = true;
-    std::cout << "Please choose a coordinate to reveal (A1,B7,I8,etc)." << std::endl;
+    std::cout << "Please choose a coordinate to reveal (A1,B7,I8,etc) or 'Q' to quit game." << std::endl;
     std::cout << "Write it on the terminal and press enter." << std::endl;
-    while (running) {
+    world.Debug_PrintGridForUser();
 
+    int totalCells{};
+
+    while (running) {
         std::getline(std::cin, userInput);
         std::transform(userInput.begin(), userInput.end(), userInput.begin(), ::toupper);
 
@@ -28,20 +30,30 @@ int main() {
             const int colum = static_cast<int>(userInput[0]) - static_cast<int>('A') + 1;
             const int row = userInput[1] - '0';
 
-           if(world.CellAlreadyReveled(row,colum)){
-               std::cout << "Coordinates already revealed.Please enter new coordinates." << std::endl;
-               continue;
-           } else {
-               if(!world.EvaluateCoordinates(row, colum)){
-                   running = false;
-                   std::cout << "Game lost :(" << std::endl;
+            if (world.CellAlreadyReveled(row, colum)) {
+                std::cout << "Coordinates already revealed.Please enter new coordinates." << std::endl;
+                continue;
+            }
+            else {
+                if (!world.EvaluateCoordinates(row, colum)) {
+                    running = false;
+                    std::cout << "Game lost :(" << std::endl;
 
-               }
-           }
+                } else {
+                    totalCells = world.GetColumns() * world.GetRows() - world.GetNumberCellsReveled() - world.GetNumberOfBombs();
+                    if (totalCells == 0) {
+                        std::cout << std::endl;
+                        std::cout << "***********************" << std::endl;
+                        std::cout << "  >>>>> YOU WIN <<<<<" << std::endl;
+                        std::cout << "***********************" << std::endl;
+                        std::cout << std::endl;
+                        break;
+                    }
+                }
+            }
         } else std::cout << "Invalid coordinates. Try again." << std::endl;
 
         world.Debug_PrintGridForUser();
-
     }
 
     return 0;
