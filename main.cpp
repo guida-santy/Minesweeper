@@ -15,8 +15,6 @@ int main() {
     std::cout << "Write it on the terminal and press enter." << std::endl;
     world.Debug_PrintGridForUser();
 
-    int totalCells{};
-
     while (running) {
         std::getline(std::cin, userInput);
         std::transform(userInput.begin(), userInput.end(), userInput.begin(), ::toupper);
@@ -40,7 +38,7 @@ int main() {
                     std::cout << "Game lost :(" << std::endl;
 
                 } else {
-                    totalCells = world.GetColumns() * world.GetRows() - world.GetNumberCellsReveled() - world.GetNumberOfBombs();
+                    auto totalCells = world.GetColumns() * world.GetRows() - world.GetNumberCellsReveled() - world.GetNumberOfBombs();
                     if (totalCells == 0) {
                         std::cout << std::endl;
                         std::cout << "***********************" << std::endl;

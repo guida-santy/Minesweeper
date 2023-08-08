@@ -53,7 +53,7 @@ void board::Grid::CreateGrid() {
 
 void board::Grid::RevelCell(const int row, int const col) {
     // TODO: make recursive safe somehow ... (iterative method might be the best alternative)
-    if (row < 1 || row > _rows || col < 1 || col > _columns || _fullGrid[row][col].WasCellReveled()){
+    if (row < 1 || row > _rows || col < 1 || col > _columns || _fullGrid[row][col].WasCellReveled()) {
         return;
     }
     _fullGrid[row][col].RevelCell();
@@ -63,7 +63,7 @@ void board::Grid::RevelCell(const int row, int const col) {
     if (_fullGrid[row][col].GetState() == 0) {
         for (int i = -1; i <= 1; ++i) {
             for (int j = -1; j <= 1; ++j) {
-                RevelCell( row + i, col + j);
+                RevelCell(row + i, col + j);
             }
         }
     }
@@ -81,7 +81,6 @@ bool board::Grid::EvaluateCoordinates(const int row, const int col) {
 }
 
 void board::Grid::Debug_PrintBoard() {
-
     for (int r = 1; r <= _rows; ++r) {
         for (int c = 1; c <= _columns; ++c) {
             if (_fullGrid[r][c].GetType() == board::cellType::normal) {
@@ -94,7 +93,7 @@ void board::Grid::Debug_PrintBoard() {
 }
 
 void board::Grid::Debug_PrintGridForUser() {
-    std::cout << "\n\n" << std::endl;
+    std::cout << std::endl;
     std::cout << "   A   B   C   D   E   F   G   H   I" << std::endl;
     for (int r = 1; r <= _rows; ++r) {
         std::cout << r << " ";
@@ -102,7 +101,7 @@ void board::Grid::Debug_PrintGridForUser() {
             if (!_runningDebug && _fullGrid[r][c].GetType() == board::cellType::bomb) {
                 std::cout << "[B]" << " ";
 
-            } else if (_fullGrid[r][c].GetType() == board::cellType::normal && _fullGrid[r][c].WasCellReveled()) {
+            } else if (_fullGrid[r][c].GetType() == board::cellType::normal && _fullGrid[r][c].WasCellReveled() || !_runningDebug) {
                 std::cout << "[" << _fullGrid[r][c].GetState() << "]" << " ";
             } else std::cout << "[X]" << " ";
         }

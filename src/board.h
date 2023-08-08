@@ -19,9 +19,13 @@ namespace board {
 
         cellType GetType() { return _type; }
 
+        [[nodiscard]] u_int GetState() const { return _state; }
+
         void SetType(cellType t) { _type = t; }
 
-        int GetState() const { return _state; }
+        void SetFlag() { _flag = true; }
+
+        void RemoveFlag() { _flag = false; }
 
         void SetState(int s) { _state = s; }
 
@@ -29,12 +33,14 @@ namespace board {
 
         bool WasCellReveled() const { return _reveled; }
 
+        bool GetFlag() const { return _flag; }
 
     private:
         const std::pair<u_int, u_int> _globalPos{}; //board pos (r,c)
-        cellType _type = cellType::normal ;
+        cellType _type = cellType::normal;
         u_int _state = 0; // how close to bomb
         bool _reveled = false;
+        bool _flag = false;
     };
 
     class Grid {
@@ -49,27 +55,32 @@ namespace board {
 
         void Debug_PrintGridForUser();
 
-        void RevelCell(int row,  int col);
+        void RevelCell(int row, int col);
 
-        bool EvaluateCoordinates(int row,  int col);
+        bool EvaluateCoordinates(int row, int col);
 
         bool CellAlreadyReveled(const int row, const int col) { return _fullGrid[row][col].WasCellReveled(); }
 
-        bool GetRows() const {return _rows;}
+        [[nodiscard]] bool GetRows() const { return _rows; }
 
-        bool GetColumns() const {return _columns;}
+        [[nodiscard]] bool GetColumns() const { return _columns; }
 
-        bool GetNumberOfBombs() const {return _numberOfBombs;}
+        [[nodiscard]] bool GetNumberOfBombs() const { return _numberOfBombs; }
 
-        int GetNumberCellsReveled() const {return _numberOfReveledCells;}
+        [[nodiscard]] int GetNumberCellsReveled() const { return _numberOfReveledCells; }
 
     private:
         const int _rows = 9;
+
         const int _columns = 9;
-        std::vector<std::vector<Cell>> _fullGrid{};
+
         const int _numberOfBombs = 10;
+
         int _numberOfReveledCells = 0;
+
         bool _runningDebug = false;
+
+        std::vector<std::vector<Cell>> _fullGrid{};
 
     };
 
